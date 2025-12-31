@@ -16,10 +16,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [captchaToken, setCaptchaToken] = useState(null);
 
+  // 🟢 อ่านค่า Config จาก .env (แปลงเป็น Boolean)
+  // ถ้าใน .env ตั้งเป็น false หรือไม่ได้ตั้งค่า ตัวแปรนี้จะเป็นเท็จ
+  const isRecaptchaEnabled = process.env.NEXT_PUBLIC_ENABLE_RECAPTCHA === 'true';
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (!captchaToken) {
+    // 🟢 เช็คเงื่อนไข: ตรวจสอบ Captcha เฉพาะตอนที่เปิดใช้งานเท่านั้น
+    if (isRecaptchaEnabled && !captchaToken) {
         Swal.fire({
             icon: "warning",
             title: "ยืนยันตัวตน",
@@ -35,6 +40,7 @@ export default function LoginPage() {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        // ส่ง token ไปด้วย (ถ้าปิดใช้งานจะเป็น null ก็ไม่เป็นไร)
         body: JSON.stringify({ username, password, captchaToken }),
       });
 
@@ -42,7 +48,11 @@ export default function LoginPage() {
 
       if (!res.ok) {
         Swal.fire({ icon: "error", title: "เข้าสู่ระบบไม่สำเร็จ", text: data.error || "กรุณาตรวจสอบข้อมูลอีกครั้ง" });
-        if (recaptchaRef.current) recaptchaRef.current.reset();
+        
+        // 🟢 รีเซ็ต Captcha เฉพาะตอนเปิดใช้งาน
+        if (isRecaptchaEnabled && recaptchaRef.current) {
+            recaptchaRef.current.reset();
+        }
         setCaptchaToken(null);
         setPassword(""); 
         setLoading(false);
@@ -57,7 +67,11 @@ export default function LoginPage() {
       setTimeout(() => router.push("/dashboard"), 1200);
     } catch (err) {
       Swal.fire({ icon: "error", title: "เกิดข้อผิดพลาด", text: "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้" });
-      if (recaptchaRef.current) recaptchaRef.current.reset();
+      
+      // 🟢 รีเซ็ต Captcha เฉพาะตอนเปิดใช้งาน
+      if (isRecaptchaEnabled && recaptchaRef.current) {
+          recaptchaRef.current.reset();
+      }
       setCaptchaToken(null);
     }
     setLoading(false);
@@ -90,7 +104,6 @@ export default function LoginPage() {
           <motion.div
             animate={{ rotate: [0, 2, -2, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
-            // 🟢 เพิ่ม d-flex justify-content-center เพื่อจัดโลโก้ให้อยู่ตรงกลางชัวร์ๆ
             className="mb-2 d-flex justify-content-center"
           >
             <Image src="/MOPH.png" alt="MOPH logo" width={70} height={70} />
@@ -137,14 +150,16 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Captcha - ใช้ scale เพื่อย่อขนาด */}
-          <div className="mb-3 d-flex justify-content-center" style={{ transform: "scale(0.85)", transformOrigin: "center" }}>
-             <ReCAPTCHA
-                ref={recaptchaRef}
-                sitekey="6LdYOy8sAAAAAOyNB3-UxhJGmKoDcm7sL5qvaPF4"
-                onChange={(token) => setCaptchaToken(token)}
-            />
-          </div>
+          {/* 🟢 Captcha - แสดงผลเฉพาะเมื่อตั้งค่าเปิดใช้งาน */}
+          {isRecaptchaEnabled && (
+            <div className="mb-3 d-flex justify-content-center" style={{ transform: "scale(0.85)", transformOrigin: "center" }}>
+                <ReCAPTCHA
+                    ref={recaptchaRef}
+                    sitekey="6LdYOy8sAAAAAOyNB3-UxhJGmKoDcm7sL5qvaPF4"
+                    onChange={(token) => setCaptchaToken(token)}
+                />
+            </div>
+          )}
 
           {/* ปุ่ม Login */}
           <motion.button
