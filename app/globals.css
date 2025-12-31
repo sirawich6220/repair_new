@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+/* -------------------- RESET -------------------- */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* -------------------- CONTENT -------------------- */
+.content-wrapper {
+  padding: 24px;
+  transition: margin-left 0.3s ease;
+  min-height: 100vh;
+}
+
+.content-wrapper.has-sidebar {
+  margin-left: 260px;
+}
+
+body.sidebar-collapsed .content-wrapper.has-sidebar {
+  margin-left: 80px;
+}
+
+/* -------------------- SIDEBAR -------------------- */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100vh;
+  background: linear-gradient(180deg, #0BA34F, #0A7E3D);
+  color: #fff;
+  box-shadow: 3px 0 12px rgba(0,0,0,0.15);
+  transition: width 0.3s ease, transform 0.3s ease;
+  z-index: 999;
+}
+
+.sidebar.collapsed {
+  width: 80px;
+}
+
+/* Toggle */
+.sidebar-toggle {
+  position: absolute;
+  top: 15px;
+  right: -18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  z-index: 1000;
+}
+
+/* Logo */
+.sidebar-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;     /* กลางแนวนอน */
+  justify-content: center; /* กลางแนวตั้ง */
+  margin-top: 60px;        /* ระยะจากด้านบน */
+  text-align: center;
+  padding: 0 12px;
+}
+
+
+/* -------------------- MENU -------------------- */
+.menu-3d {
+  transition: all 0.25s ease;
+}
+
+.menu-normal:hover {
+  background: rgba(255,255,255,0.18);
+  transform: translateX(6px);
+}
+
+.menu-active {
+  background: rgba(255,255,255,0.28);
+  font-weight: 700;
+  border-left: 4px solid rgba(255,255,255,0.9);
+}
+
+/* -------------------- MOBILE -------------------- */
+@media (max-width: 768px) {
+  .content-wrapper.has-sidebar {
+    margin-left: 0;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  body.sidebar-open .sidebar {
+    transform: translateX(0);
+  }
+}
